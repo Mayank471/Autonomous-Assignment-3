@@ -1,0 +1,167 @@
+
+==============================================================================
+PART 1  -  the book's examples (Figures 5.1, 5.2, 5.3; Examples 5.5-5.9)
+==============================================================================
+
+Figure 5.1: AF(args=[1, 2, 3, 4, 5], attacks=[2->1, 3->2, 4->1, 5->4])
+  grounded    : {1, 3, 5}
+  complete    : [{1, 3, 5}]
+  preferred   : [{1, 3, 5}]
+  stable      : [{1, 3, 5}]
+  semi-stable : [{1, 3, 5}]
+  status      : 1: skeptically accepted, 2: rejected, 3: skeptically accepted, 4: rejected, 5: skeptically accepted
+
+Figure 5.2: AF(args=[1, 2, 3], attacks=[1->2, 2->1])
+  grounded    : {3}
+  complete    : [{3}, {1, 3}, {2, 3}]
+  preferred   : [{1, 3}, {2, 3}]
+  stable      : [{1, 3}, {2, 3}]
+  semi-stable : [{1, 3}, {2, 3}]
+  status      : 1: credulously accepted, 2: credulously accepted, 3: skeptically accepted
+
+Figure 5.3: AF(args=['a', 'b', 'c', 'd', 'e'], attacks=[b->a, c->b, c->d, d->b, d->c, e->d])
+  grounded    : {a, c, e}
+  complete    : [{a, c, e}]
+  preferred   : [{a, c, e}]
+  stable      : [{a, c, e}]
+  semi-stable : [{a, c, e}]
+  status      : a: skeptically accepted, b: rejected, c: skeptically accepted, d: rejected, e: skeptically accepted
+
+Figure 5.1 grounded iteration  F(0) = {3, 5}   F^2(0) = {1, 3, 5}
+Figure 5.2 legal labellings:
+   {1: 'in', 2: 'out', 3: 'in'}
+   {1: 'out', 2: 'in', 3: 'in'}
+   {1: 'undec', 2: 'undec', 3: 'in'}
+
+==============================================================================
+PART 1  -  items 1-5: the framework class and the basic notions
+==============================================================================
+Framework: AF(args=['a', 'b', 'c', 'd'], attacks=[a->b, b->c, c->d])
+  conflict-free {}        : True
+  conflict-free {a, c}    : True
+  conflict-free {a, b}    : False
+  'c' defended by {a}   : True
+  'c' defended by {}    : False
+  'd' defended by {a}   : False
+  'd' defended by {b}   : True
+  F({}      ) = {a}
+  F({a}     ) = {a, c}
+  F({a, c}  ) = {a, c}
+  {c}      admissible: False  complete: False
+  {a}      admissible: True   complete: False
+  {a, c}   admissible: True   complete: True
+
+==============================================================================
+PART 1  -  item 6A-6C: grounded, complete, preferred, stable, semi-stable
+==============================================================================
+
+Chain  a->b->c
+  AF(args=['a', 'b', 'c'], attacks=[a->b, b->c])
+  grounded    : {a, c}
+  complete    : [{a, c}]
+  preferred   : [{a, c}]
+  stable      : [{a, c}]
+  semi-stable : [{a, c}]
+
+Nixon diamond  a<->b
+  AF(args=['a', 'b'], attacks=[a->b, b->a])
+  grounded    : {}
+  complete    : [{}, {a}, {b}]
+  preferred   : [{a}, {b}]
+  stable      : [{a}, {b}]
+  semi-stable : [{a}, {b}]
+
+Odd cycle  a->b->c->a
+  AF(args=['a', 'b', 'c'], attacks=[a->b, b->c, c->a])
+  grounded    : {}
+  complete    : [{}]
+  preferred   : [{}]
+  stable      : []  (none)
+  semi-stable : [{}]
+
+a<->b, b->c, c->c  (preferred != stable)
+  AF(args=['a', 'b', 'c'], attacks=[a->b, b->a, b->c, c->c])
+  grounded    : {}
+  complete    : [{}, {a}, {b}]
+  preferred   : [{a}, {b}]
+  stable      : [{b}]
+  semi-stable : [{b}]
+
+Caminada: 3-cycle + mutual attack  (no stable, but semi-stable)
+  AF(args=['a', 'b', 'c', 'd', 'e'], attacks=[a->b, b->c, c->a, c->d, d->e, e->d])
+  grounded    : {}
+  complete    : [{}, {e}]
+  preferred   : [{e}]
+  stable      : []  (none)
+  semi-stable : [{e}]
+
+==============================================================================
+PART 1  -  item 6D: all legal (in/out/undec) labellings
+==============================================================================
+AF(args=['a', 'b', 'c'], attacks=[a->b, b->a, b->c, c->c])
+   {'a': 'in', 'b': 'out', 'c': 'undec'}
+   {'a': 'out', 'b': 'in', 'c': 'out'}
+   {'a': 'undec', 'b': 'undec', 'c': 'undec'}
+
+==============================================================================
+PART 1  -  item 6E: acceptance status (preferred semantics)
+==============================================================================
+AF(args=['a', 'b', 'c', 'd'], attacks=[a->b, b->a, b->c, c->c])
+  a: credulously accepted
+  b: credulously accepted
+  c: rejected
+  d: skeptically accepted
+  under stable semantics (only stable extension is {b, d}):
+  a: rejected
+  b: skeptically accepted
+  c: rejected
+  d: skeptically accepted
+
+==============================================================================
+PART 2  -  the book's Examples 5.10 and 5.11
+==============================================================================
+Example 5.10: x={1,4,5}, y={2}, z={3}, R={(1,2),(2,3),(3,4),(3,5)}
+  truthful outcome {1, 3};  utilities u_x = 1, u_y = 0, u_z = 1   (book misprint: it prints u_y(o,{3}) and u_z(o,{2}), the sets are swapped)
+  x withholds 1 -> outcome {2, 4, 5}, u_x = 2
+  strategyproof? False; agents with a profitable deviation: ['x']
+  Thm 5.4 condition (incl. conflict-free types): False, violations [(0, 1, 4), (0, 1, 5)]
+Example 5.11: add argument 6 to x and the defeat (6,3)
+  truthful outcome {1, 4, 5, 6};  u_x = 4
+  strategyproof? True; Thm 5.4 condition: False (violations [(0, 1, 4), (0, 1, 5)]) -> sufficient, not necessary
+  without 6 strategyproof? False;  without 5 strategyproof? True  -> the cancelling argument is 6 (the book's text says 5: erratum)
+
+==============================================================================
+PART 2  -  the mechanism, best responses, strategyproofness
+==============================================================================
+Agent 0 owns {al, be}; agent 1 owns {de}; attacks: al<->de, al->be
+  reports ['{al, be}', '{de}']         -> grounded {}
+  reports ['{be}', '{de}']             -> grounded {be, de}
+  reports ['{al}', '{de}']             -> grounded {}
+  reports ['{al, be}', '{}']           -> grounded {al}
+
+Best responses of agent 0 against agent 1 revealing {de}: utility 1, reports ['{be}']
+Strategyproof (truth dominant for every agent)? False
+   agent 0 vs { 1: {de} }: truthful utility 0, can reach 1 by revealing ['{be}']
+Theorem 5.4 condition holds? False; violating (agent, alpha, beta): [(0, 'al', 'be')]
+
+A strategyproof instance whose condition fails (hiding alpha just trades alpha for beta):
+  single agent with al->be:  strategyproof = True   Theorem 5.4 condition = False
+
+A strategyproof instance whose condition holds (even path al->x->be through another agent):
+  strategyproof = True   condition = True
+
+==============================================================================
+PART 2  -  item 4: odd-length paths in graphs with cycles
+==============================================================================
+  a->x, x->x, x->b (loop on x)                 odd walk: True   odd simple path: False
+  2-cycle a<->b, odd closed walk a~>a?         odd walk: False  odd simple path: False
+  3-cycle a->b->c->a, odd closed walk a~>a?    odd walk: True   odd simple path: True
+
+==============================================================================
+PART 2  -  miniature experiment (full run: python experiments.py)
+==============================================================================
+    p     N  strategyproof  Thm5.4 holds  holds&!SP  SP&!holds
+  0.1   150          0.753         0.233          0         78
+  0.3   150          0.140         0.000          0         21
+  0.5   150          0.113         0.000          0         17
+  0.8   150          0.287         0.000          0         43

@@ -1,0 +1,40 @@
+  p=0.1 done (13s)
+  p=0.2 done (27s)
+  p=0.3 done (37s)
+  p=0.4 done (46s)
+  p=0.5 done (55s)
+  p=0.6 done (69s)
+  p=0.7 done (90s)
+  p=0.8 done (128s)
+  p=0.9 done (205s)
+
+27000 instances, 3000 per p, seed 2024
+
+Fraction strategyproof (and fraction satisfying the Thm 5.4 condition) by p
+    p  strategyproof  walk_distinct      walk_same  path_distinct      path_same      book_path
+  0.1          0.744          0.221          0.120          0.241          0.120          0.121
+  0.2          0.374          0.033          0.012          0.053          0.012          0.012
+  0.3          0.170          0.004          0.002          0.012          0.002          0.002
+  0.4          0.108          0.000          0.000          0.002          0.000          0.000
+  0.5          0.089          0.000          0.000          0.000          0.000          0.000
+  0.6          0.113          0.000          0.000          0.000          0.000          0.000
+  0.7          0.166          0.000          0.000          0.000          0.000          0.000
+  0.8          0.284          0.000          0.000          0.000          0.000          0.000
+  0.9          0.528          0.000          0.000          0.000          0.000          0.000
+
+Contingency (counts over all instances)
+  [walk_distinct] cond&SP=777  cond&manipulable=0  !cond&SP=6948  !cond&manipulable=19275
+      why SP though condition fails (per instance): {'rescue_offset': 1071, 'beta_hopeless+hiding_hurts_beta+rescue_offset': 40, 'beta_hopeless+rescue_offset': 472, 'alpha_irrelevant': 65, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta': 310, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta+rescue_offset': 237, 'alpha_irrelevant+beta_hopeless': 805, 'alpha_irrelevant+rescue_offset': 224, 'beta_hopeless': 3252, 'alpha_irrelevant+beta_hopeless+rescue_offset': 278, 'beta_hopeless+hiding_hurts_beta': 53, 'alpha_irrelevant+hiding_hurts_beta+rescue_offset': 48, 'alpha_irrelevant+hiding_hurts_beta': 27, 'hiding_hurts_beta+rescue_offset': 36, 'hiding_hurts_beta': 30}
+      same, per violating pair:                      {'rescue_offset': 3248, 'hiding_hurts_beta': 1045, 'beta_hopeless': 50933, 'alpha_irrelevant': 3850}
+  [walk_same] cond&SP=402  cond&manipulable=0  !cond&SP=7323  !cond&manipulable=19275
+      why SP though condition fails (per instance): {'rescue_offset': 682, 'beta_hopeless+rescue_offset': 807, 'beta_hopeless': 3154, 'beta_hopeless+hiding_hurts_beta+rescue_offset': 113, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta': 1076, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta+rescue_offset': 459, 'alpha_irrelevant+beta_hopeless': 118, 'alpha_irrelevant+rescue_offset': 136, 'alpha_irrelevant+beta_hopeless+rescue_offset': 170, 'beta_hopeless+hiding_hurts_beta': 552, 'alpha_irrelevant+hiding_hurts_beta+rescue_offset': 22, 'hiding_hurts_beta+rescue_offset': 17, 'alpha_irrelevant+hiding_hurts_beta': 9, 'alpha_irrelevant': 4, 'hiding_hurts_beta': 4}
+      same, per violating pair:                      {'rescue_offset': 3248, 'beta_hopeless': 78737, 'hiding_hurts_beta': 4319, 'alpha_irrelevant': 3850}
+  [path_distinct] cond&SP=928  cond&manipulable=0  !cond&SP=6797  !cond&manipulable=19275
+      why SP though condition fails (per instance): {'rescue_offset': 1166, 'beta_hopeless+rescue_offset': 508, 'alpha_irrelevant': 34, 'beta_hopeless+hiding_hurts_beta': 36, 'alpha_irrelevant+beta_hopeless+rescue_offset': 300, 'alpha_irrelevant+beta_hopeless': 799, 'alpha_irrelevant+rescue_offset': 224, 'beta_hopeless': 3313, 'alpha_irrelevant+hiding_hurts_beta+rescue_offset': 40, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta+rescue_offset': 121, 'hiding_hurts_beta+rescue_offset': 27, 'alpha_irrelevant+hiding_hurts_beta': 7, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta': 189, 'hiding_hurts_beta': 13, 'beta_hopeless+hiding_hurts_beta+rescue_offset': 20}
+      same, per violating pair:                      {'rescue_offset': 3248, 'beta_hopeless': 49829, 'alpha_irrelevant': 2956, 'hiding_hurts_beta': 561}
+  [path_same] cond&SP=402  cond&manipulable=0  !cond&SP=7323  !cond&manipulable=19275
+      why SP though condition fails (per instance): {'rescue_offset': 682, 'beta_hopeless+rescue_offset': 920, 'beta_hopeless': 3365, 'hiding_hurts_beta+rescue_offset': 20, 'alpha_irrelevant+beta_hopeless': 129, 'beta_hopeless+hiding_hurts_beta': 516, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta+rescue_offset': 326, 'alpha_irrelevant+rescue_offset': 136, 'alpha_irrelevant+beta_hopeless+rescue_offset': 202, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta': 890, 'alpha_irrelevant+hiding_hurts_beta+rescue_offset': 21, 'beta_hopeless+hiding_hurts_beta+rescue_offset': 99, 'alpha_irrelevant+hiding_hurts_beta': 6, 'alpha_irrelevant': 4, 'hiding_hurts_beta': 7}
+      same, per violating pair:                      {'rescue_offset': 3248, 'beta_hopeless': 77540, 'hiding_hurts_beta': 3383, 'alpha_irrelevant': 2956}
+  [book_path] cond&SP=405  cond&manipulable=0  !cond&SP=7320  !cond&manipulable=19275
+      why SP though condition fails (per instance): {'rescue_offset': 694, 'beta_hopeless+rescue_offset': 980, 'beta_hopeless': 3836, 'alpha_irrelevant+beta_hopeless': 827, 'beta_hopeless+hiding_hurts_beta': 45, 'alpha_irrelevant+beta_hopeless+rescue_offset': 383, 'alpha_irrelevant+rescue_offset': 141, 'alpha_irrelevant+hiding_hurts_beta+rescue_offset': 21, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta+rescue_offset': 140, 'hiding_hurts_beta+rescue_offset': 18, 'alpha_irrelevant+hiding_hurts_beta': 4, 'alpha_irrelevant': 6, 'beta_hopeless+hiding_hurts_beta+rescue_offset': 29, 'alpha_irrelevant+beta_hopeless+hiding_hurts_beta': 192, 'hiding_hurts_beta': 4}
+      same, per violating pair:                      {'rescue_offset': 3248, 'beta_hopeless': 76980, 'alpha_irrelevant': 2956, 'hiding_hurts_beta': 561}
