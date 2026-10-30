@@ -170,6 +170,16 @@ def run(instances, seed, out_dir):
         json.dump(summary, f, indent=2)
     with open(os.path.join(out_dir, "notable_instances.json"), "w") as f:
         json.dump(notable, f, indent=1, default=list)
+    # flat, human-readable list of question-3 instances for the headline reading
+    with open(os.path.join(out_dir, "q3_strategyproof_but_condition_fails.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["id", "p", "attacks", "agents_arguments", "violating_(agent,alpha,beta)", "reasons"])
+        for x in notable[PRIMARY]["sp_but_cond_fails"]:
+            w.writerow([
+                x["id"], x["p"], " ".join(f"{a}->{b}" for a, b in x["attacks"]),
+                " | ".join("{" + ",".join(map(str, A)) + "}" for A in x["agents"]),
+                "; ".join(str(tuple(v)) for v in x["violations"]), "+".join(x["reasons"]),
+            ])
     return rows, summary, notable
 
 

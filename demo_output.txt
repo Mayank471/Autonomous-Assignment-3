@@ -1,167 +1,337 @@
 
-==============================================================================
-PART 1  -  the book's examples (Figures 5.1, 5.2, 5.3; Examples 5.5-5.9)
-==============================================================================
-
-Figure 5.1: AF(args=[1, 2, 3, 4, 5], attacks=[2->1, 3->2, 4->1, 5->4])
-  grounded    : {1, 3, 5}
-  complete    : [{1, 3, 5}]
-  preferred   : [{1, 3, 5}]
-  stable      : [{1, 3, 5}]
-  semi-stable : [{1, 3, 5}]
-  status      : 1: skeptically accepted, 2: rejected, 3: skeptically accepted, 4: rejected, 5: skeptically accepted
-
-Figure 5.2: AF(args=[1, 2, 3], attacks=[1->2, 2->1])
-  grounded    : {3}
-  complete    : [{3}, {1, 3}, {2, 3}]
-  preferred   : [{1, 3}, {2, 3}]
-  stable      : [{1, 3}, {2, 3}]
-  semi-stable : [{1, 3}, {2, 3}]
-  status      : 1: credulously accepted, 2: credulously accepted, 3: skeptically accepted
-
-Figure 5.3: AF(args=['a', 'b', 'c', 'd', 'e'], attacks=[b->a, c->b, c->d, d->b, d->c, e->d])
-  grounded    : {a, c, e}
-  complete    : [{a, c, e}]
-  preferred   : [{a, c, e}]
-  stable      : [{a, c, e}]
-  semi-stable : [{a, c, e}]
-  status      : a: skeptically accepted, b: rejected, c: skeptically accepted, d: rejected, e: skeptically accepted
-
-Figure 5.1 grounded iteration  F(0) = {3, 5}   F^2(0) = {1, 3, 5}
-Figure 5.2 legal labellings:
-   {1: 'in', 2: 'out', 3: 'in'}
-   {1: 'out', 2: 'in', 3: 'in'}
-   {1: 'undec', 2: 'undec', 3: 'in'}
+##############################################################################
+#  PART 1 - ARGUMENTATION ENGINE (all examples are taken from the book, Chapter 5)
+##############################################################################
 
 ==============================================================================
-PART 1  -  items 1-5: the framework class and the basic notions
+STEP 1  [Item 1]  The argumentation framework class
 ==============================================================================
-Framework: AF(args=['a', 'b', 'c', 'd'], attacks=[a->b, b->c, c->d])
-  conflict-free {}        : True
-  conflict-free {a, c}    : True
-  conflict-free {a, b}    : False
-  'c' defended by {a}   : True
-  'c' defended by {}    : False
-  'd' defended by {a}   : False
-  'd' defended by {b}   : True
-  F({}      ) = {a}
-  F({a}     ) = {a, c}
-  F({a, c}  ) = {a, c}
-  {c}      admissible: False  complete: False
-  {a}      admissible: True   complete: False
-  {a, c}   admissible: True   complete: True
+Figure 5.1: alpha1 has two defeaters (2 and 4), which are defeated by 3 and 5 respectively.
+>>> af = ArgumentationFramework({1,2,3,4,5}, {(3,2),(2,1),(5,4),(4,1)})
+      = AF(args=[1, 2, 3, 4, 5], attacks=[2->1, 3->2, 4->1, 5->4])
+>>> af.attackers_of(1)
+      = {2, 4}
+>>> af.targets_of(3)
+      = {2}
+>>> af.attacked_by({3, 5})        # S+ = everything attacked by the set
+      = {2, 4}
+>>> ArgumentationFramework.parse('a->b, b->c')      # compact constructor
+      = AF(args=['a', 'b', 'c'], attacks=[a->b, b->c])
 
 ==============================================================================
-PART 1  -  item 6A-6C: grounded, complete, preferred, stable, semi-stable
+STEP 2  [Item 2]  Conflict-free test
 ==============================================================================
-
-Chain  a->b->c
-  AF(args=['a', 'b', 'c'], attacks=[a->b, b->c])
-  grounded    : {a, c}
-  complete    : [{a, c}]
-  preferred   : [{a, c}]
-  stable      : [{a, c}]
-  semi-stable : [{a, c}]
-
-Nixon diamond  a<->b
-  AF(args=['a', 'b'], attacks=[a->b, b->a])
-  grounded    : {}
-  complete    : [{}, {a}, {b}]
-  preferred   : [{a}, {b}]
-  stable      : [{a}, {b}]
-  semi-stable : [{a}, {b}]
-
-Odd cycle  a->b->c->a
-  AF(args=['a', 'b', 'c'], attacks=[a->b, b->c, c->a])
-  grounded    : {}
-  complete    : [{}]
-  preferred   : [{}]
-  stable      : []  (none)
-  semi-stable : [{}]
-
-a<->b, b->c, c->c  (preferred != stable)
-  AF(args=['a', 'b', 'c'], attacks=[a->b, b->a, b->c, c->c])
-  grounded    : {}
-  complete    : [{}, {a}, {b}]
-  preferred   : [{a}, {b}]
-  stable      : [{b}]
-  semi-stable : [{b}]
-
-Caminada: 3-cycle + mutual attack  (no stable, but semi-stable)
-  AF(args=['a', 'b', 'c', 'd', 'e'], attacks=[a->b, b->c, c->a, c->d, d->e, e->d])
-  grounded    : {}
-  complete    : [{}, {e}]
-  preferred   : [{e}]
-  stable      : []  (none)
-  semi-stable : [{e}]
+A set is conflict-free if no member attacks a member.
+>>> is_conflict_free(af, set())
+      = True
+>>> is_conflict_free(af, {1, 3, 5})
+      = True
+>>> is_conflict_free(af, {3, 2})
+      = False
+>>> is_conflict_free(af, {2, 4})
+      = True
+    -> {3, 2} fails because 3 attacks 2; {2, 4} is fine (2 and 4 do not attack each other).
 
 ==============================================================================
-PART 1  -  item 6D: all legal (in/out/undec) labellings
+STEP 3  [Item 3]  Can an argument be defended by S?
 ==============================================================================
-AF(args=['a', 'b', 'c'], attacks=[a->b, b->a, b->c, c->c])
-   {'a': 'in', 'b': 'out', 'c': 'undec'}
-   {'a': 'out', 'b': 'in', 'c': 'out'}
-   {'a': 'undec', 'b': 'undec', 'c': 'undec'}
+S defends a when every attacker of a is itself attacked by a member of S.
+>>> is_defended(af, 1, {3, 5})
+      = True
+>>> is_defended(af, 1, {3})
+      = False
+>>> is_defended(af, 1, set())
+      = False
+>>> is_defended(af, 3, set())
+      = True
+    -> 1 needs both 3 (kills 2) and 5 (kills 4); the unattacked arguments 3 and 5 are defended by the empty set.
 
 ==============================================================================
-PART 1  -  item 6E: acceptance status (preferred semantics)
+STEP 4  [Item 4]  Characteristic function F(S) = arguments defended by S
 ==============================================================================
-AF(args=['a', 'b', 'c', 'd'], attacks=[a->b, b->a, b->c, c->c])
-  a: credulously accepted
-  b: credulously accepted
-  c: rejected
-  d: skeptically accepted
-  under stable semantics (only stable extension is {b, d}):
-  a: rejected
-  b: skeptically accepted
-  c: rejected
-  d: skeptically accepted
+>>> characteristic_function(af, set())
+      = {3, 5}
+>>> characteristic_function(af, {3, 5})
+      = {1, 3, 5}
+>>> characteristic_function(af, {1, 3, 5})
+      = {1, 3, 5}
+    -> F(empty) = {3,5}, F({3,5}) = {1,3,5}, F({1,3,5}) = {1,3,5}: matches the book (p.184).
 
 ==============================================================================
-PART 2  -  the book's Examples 5.10 and 5.11
+STEP 5  [Item 5]  Admissible set and complete extension
 ==============================================================================
-Example 5.10: x={1,4,5}, y={2}, z={3}, R={(1,2),(2,3),(3,4),(3,5)}
-  truthful outcome {1, 3};  utilities u_x = 1, u_y = 0, u_z = 1   (book misprint: it prints u_y(o,{3}) and u_z(o,{2}), the sets are swapped)
-  x withholds 1 -> outcome {2, 4, 5}, u_x = 2
-  strategyproof? False; agents with a profitable deviation: ['x']
-  Thm 5.4 condition (incl. conflict-free types): False, violations [(0, 1, 4), (0, 1, 5)]
-Example 5.11: add argument 6 to x and the defeat (6,3)
-  truthful outcome {1, 4, 5, 6};  u_x = 4
-  strategyproof? True; Thm 5.4 condition: False (violations [(0, 1, 4), (0, 1, 5)]) -> sufficient, not necessary
-  without 6 strategyproof? False;  without 5 strategyproof? True  -> the cancelling argument is 6 (the book's text says 5: erratum)
+Admissible = conflict-free and defends all its members; complete = admissible and contains everything it defends.
+>>> is_admissible(af, set()), is_complete(af, set())
+      = True, False
+>>> is_admissible(af, {3, 5}), is_complete(af, {3, 5})
+      = True, False
+>>> is_admissible(af, {1, 3, 5}), is_complete(af, {1, 3, 5})
+      = True, True
+>>> is_admissible(af, {1}), is_complete(af, {1})
+      = False, False
+>>> is_admissible(af, {2, 3}), is_complete(af, {2, 3})
+      = False, False
+    -> {3,5} is admissible but not complete (it defends 1 but does not contain it) - Example 5.6.
+>>> admissible_sets(af)
+      = [{}, {3}, {5}, {3, 5}, {1, 3, 5}]
+    -> exactly the admissible sets listed in Example 5.5.
 
 ==============================================================================
-PART 2  -  the mechanism, best responses, strategyproofness
+STEP 6  [Item 6A]  Grounded extension (least fixed point of F)
 ==============================================================================
-Agent 0 owns {al, be}; agent 1 owns {de}; attacks: al<->de, al->be
-  reports ['{al, be}', '{de}']         -> grounded {}
-  reports ['{be}', '{de}']             -> grounded {be, de}
-  reports ['{al}', '{de}']             -> grounded {}
-  reports ['{al, be}', '{}']           -> grounded {al}
-
-Best responses of agent 0 against agent 1 revealing {de}: utility 1, reports ['{be}']
-Strategyproof (truth dominant for every agent)? False
-   agent 0 vs { 1: {de} }: truthful utility 0, can reach 1 by revealing ['{be}']
-Theorem 5.4 condition holds? False; violating (agent, alpha, beta): [(0, 'al', 'be')]
-
-A strategyproof instance whose condition fails (hiding alpha just trades alpha for beta):
-  single agent with al->be:  strategyproof = True   Theorem 5.4 condition = False
-
-A strategyproof instance whose condition holds (even path al->x->be through another agent):
-  strategyproof = True   condition = True
+>>> grounded_extension(af)           # Figure 5.1
+      = {1, 3, 5}
+    iteration trace  F^k(empty):
+      F^1(empty) = {3, 5}
+      F^2(empty) = {1, 3, 5}
+      F^3(empty) = {1, 3, 5}
+>>> grounded_extension(af)           # Figure 5.3 (b->a, c->b, d->b, c<->d, e->d)
+      = {a, c, e}
+    -> the book states {a, c, e} on p.188: e is unattacked, kills d, so c is reinstated, kills b, so a is defended.
 
 ==============================================================================
-PART 2  -  item 4: odd-length paths in graphs with cycles
+STEP 7  [Item 6B]  All complete extensions
 ==============================================================================
-  a->x, x->x, x->b (loop on x)                 odd walk: True   odd simple path: False
-  2-cycle a<->b, odd closed walk a~>a?         odd walk: False  odd simple path: False
-  3-cycle a->b->c->a, odd closed walk a~>a?    odd walk: True   odd simple path: True
+Figure 5.2: alpha1 <-> alpha2, alpha3 on its own.
+    framework: AF(args=[1, 2, 3], attacks=[1->2, 2->1])
+>>> complete_extensions(af)
+      = [{3}, {1, 3}, {2, 3}]
+    -> three complete extensions {3}, {1,3}, {2,3} (Example 5.7).
 
 ==============================================================================
-PART 2  -  miniature experiment (full run: python experiments.py)
+STEP 8  [Item 6C]  All extensions: grounded, preferred, stable, semi-stable
 ==============================================================================
-    p     N  strategyproof  Thm5.4 holds  holds&!SP  SP&!holds
-  0.1   150          0.753         0.233          0         78
-  0.3   150          0.140         0.000          0         21
-  0.5   150          0.113         0.000          0         17
-  0.8   150          0.287         0.000          0         43
+    Figure 5.2:
+>>> grounded_extension(af)
+      = {3}
+>>> preferred_extensions(af)
+      = [{1, 3}, {2, 3}]
+>>> stable_extensions(af)
+      = [{1, 3}, {2, 3}]
+>>> semi_stable_extensions(af)
+      = [{1, 3}, {2, 3}]
+
+    A framework where the semantics differ:  a<->b, b->c, c->c
+>>> all_extensions(af)
+      = {complete: [{}, {a}, {b}], grounded: [{}], preferred: [{a}, {b}], semi-stable: [{b}], stable: [{b}]}
+    -> preferred {a},{b}; only {b} is stable (it attacks a and c); semi-stable = {b}.
+
+    A framework with no stable extension (odd cycle a->b->c->a):
+>>> all_extensions(af)
+      = {complete: [{}], grounded: [{}], preferred: [{}], semi-stable: [{}], stable: []}
+
+==============================================================================
+STEP 9  [Item 6D]  All legal in/out/undec labellings
+==============================================================================
+Figure 5.2 - the three labellings L^G, L1, L2 of the book (Fig. 5.2).
+    argument  labelling 1   labelling 2   labelling 3   
+    alpha1      in           out          undec        
+    alpha2      out          in           undec        
+    alpha3      in           in           in           
+    in-sets: {1, 3}, {2, 3}, {3}  (= the complete extensions)
+>>> is_legal_labelling(af, {1: 'in', 2: 'in', 3: 'in'})
+      = False
+
+==============================================================================
+STEP 10  [Item 6E]  Acceptance status of an argument (skeptical / credulous / rejected)
+==============================================================================
+    Figure 5.2  (preferred semantics):
+      argument 1: credulously accepted
+      argument 2: credulously accepted
+      argument 3: skeptically accepted
+    Figure 5.1  (preferred semantics):
+      argument 1: skeptically accepted
+      argument 2: rejected
+      argument 3: skeptically accepted
+      argument 4: rejected
+      argument 5: skeptically accepted
+
+==============================================================================
+STEP 11  [Test]  Run the full test-suite (book examples + random cross-checks)
+==============================================================================
+test_book_examples.py asserts every value the book states; test_engine.py cross-checks on 300 random AFs.
+    tests run: 48   failures: 0   errors: 0   => ALL PASS
+
+##############################################################################
+#  PART 2 - STRATEGIC ARGUMENTATION (grounded direct argumentation mechanism)
+##############################################################################
+
+==============================================================================
+STEP 12  [Setup]  Book Example 5.10
+==============================================================================
+Three agents:  x owns {1,4,5},  y owns {2},  z owns {3}.   Defeats R = {(1,2), (2,3), (3,4), (3,5)}.
+Utility of an agent = number of ITS OWN arguments that end up accepted (acceptability maximiser).
+    StrategicGame(attacks=frozenset({(2, 3), (1, 2), (3, 4), (3, 5)}), agent_arguments=(frozenset({1, 4, 5}), frozenset({2}), frozenset({3})))
+
+==============================================================================
+STEP 13  [Item 1]  The mechanism: grounded extension of the graph induced by the revealed arguments
+==============================================================================
+>>> grounded_direct_mechanism(R, [{1,4,5}, {2}, {3}])   # everybody truthful
+      = {1, 3}
+      u_x = 1
+      u_y = 0
+      u_z = 1
+    -> outcome {1,3}: 1 wins, kills 2, so 3 is defended and kills 4 and 5.  u_x=1, u_y=0, u_z=1.
+    -> (book misprint: it prints u_y(o,{3})=1 and u_z(o,{2})=0 - the two argument sets are swapped.)
+>>> grounded_direct_mechanism(R, [{4,5}, {2}, {3}])   # x hides argument 1
+      = {2, 4, 5}
+      u_x = 2
+    -> hiding 1 breaks the defeat chain 1->2->3->4,5: outcome {2,4,5}, so x now has 2 accepted arguments instead of 1.
+
+==============================================================================
+STEP 14  [Item 2]  Best responses: enumerate every subset x could reveal, others fixed
+==============================================================================
+    other agents truthful: y reveals {2}, z reveals {3}.  All 2^3 = 8 reports of x and their utilities:
+      x reveals {}         -> outcome {2}          u_x = 0
+      x reveals {1}        -> outcome {1, 3}       u_x = 1
+      x reveals {4}        -> outcome {2, 4}       u_x = 1
+      x reveals {5}        -> outcome {2, 5}       u_x = 1
+      x reveals {1, 4}     -> outcome {1, 3}       u_x = 1
+      x reveals {1, 5}     -> outcome {1, 3}       u_x = 1
+      x reveals {4, 5}     -> outcome {2, 4, 5}    u_x = 2
+      x reveals {1, 4, 5}  -> outcome {1, 3}       u_x = 1
+>>> best_responses(game, x, {y: {2}, z: {3}})
+      = utility 2, reports [{4, 5}]
+    -> x's unique best response is {4,5}: lying by omission pays.  Truthful {1,4,5} gives only 1.
+    agent y against truthful others: best utility 0, best reports [{}, {2}]
+    agent z against truthful others: best utility 1, best reports [{3}]
+    -> for y and z the truthful report is among the best responses (book: it weakly dominates revealing nothing).
+
+==============================================================================
+STEP 15  [Item 3]  Theorem 5.3: is truth-telling the best response against EVERY combination of the others' subsets?
+==============================================================================
+>>> is_strategyproof(Example 5.10)
+      = False   (1 counterexamples)
+    first counterexample: agent x, others reveal {'y': '{2}', 'z': '{3}'}, truthful utility 1, best achievable 2 by revealing [{4, 5}]
+    agents with a profitable deviation: ['x']
+
+    Book Example 5.11: add argument 6 (owned by x) and the defeat (6, 3):  x = {1,4,5,6}
+>>> is_strategyproof(Example 5.11)
+      = True      (truthful outcome {1, 4, 5, 6}: x gets all 4 of its arguments accepted)
+
+==============================================================================
+STEP 16  [Item 4]  Theorem 5.4: does some agent hold alpha, beta with an odd-length directed path alpha ~> beta?
+==============================================================================
+If NO agent does, the mechanism is guaranteed strategyproof (sufficient condition).
+>>> satisfies_theorem_5_4(Example 5.10)
+      = holds: False, violations (agent, alpha, beta): [('x', 1, 4), ('x', 1, 5)]
+    -> x owns 1 and 4; odd path 1 -> 2 -> 3 -> 4 (length 3).
+    -> x owns 1 and 5; odd path 1 -> 2 -> 3 -> 5 (length 3).
+    -> so the condition cannot certify Example 5.10, and indeed it is manipulable.
+>>> satisfies_theorem_5_4(Example 5.11)
+      = holds: False, violations [('x', 1, 4), ('x', 1, 5)]
+    -> condition FAILS but the mechanism IS strategyproof (step above): the condition is sufficient, not necessary.
+    -> why: argument 6 defeats 3 whenever x reveals it, so 4 and 5 never depend on 1 - 6 'cancels' the indirect defeat.
+
+    Handling cycles - parity search, so the check always terminates:
+      graph                                       odd simple path   odd walk (may repeat nodes)
+      a->x, x->x (loop), x->b                     False             True
+      2-cycle a<->b, odd closed path a~>a         False             False
+      3-cycle a->b->c->a, odd closed path a~>a    True              True
+    -> the loop example has an odd walk (a,x,x,b: length 3) but no odd simple path - the two readings are both implemented.
+
+==============================================================================
+STEP 17  [Misprints]  The two misprints of the book, verified by the code
+==============================================================================
+    (1) Example 5.10 utilities: y owns {2} -> u_y = 0; z owns {3} -> u_z = 1 (the book swaps the argument sets).
+    (2) Which argument cancels the indirect self-defeat in Example 5.11?
+        remove 6: strategyproof? False   (x can gain again)
+        remove 5: strategyproof? True    (still dominant)
+    -> so it is argument 6, not 5 (5 defeats nothing and cannot influence anyone).
+
+##############################################################################
+#  EXPERIMENTS - random instances (3 agents, 6-8 arguments, attack probability p)
+##############################################################################
+
+==============================================================================
+STEP 18  [Setup]  How the instances are generated and checked
+==============================================================================
+For each p in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]: 500 random instances.  6, 7 or 8 arguments; every ordered pair (a,b)
+is an attack with probability p; each argument goes to one of 3 agents uniformly at random.
+For each instance: strategyproof? (exhaustive check, item 3)   Theorem 5.4 condition holds? (item 4)
+(full run of the report: python experiments.py -> 27000 instances, results/)
+      p=0.1 done
+      p=0.2 done
+      p=0.3 done
+      p=0.4 done
+      p=0.5 done
+      p=0.6 done
+      p=0.7 done
+      p=0.8 done
+      p=0.9 done
+
+==============================================================================
+STEP 19  [Q1]  Fraction of instances that are strategyproof, for each p
+==============================================================================
+       p  instances  strategyproof  Thm 5.4 holds
+     0.1        500          0.750          0.224
+     0.2        500          0.366          0.050
+     0.3        500          0.172          0.010
+     0.4        500          0.102          0.000
+     0.5        500          0.080          0.000
+     0.6        500          0.080          0.000
+     0.7        500          0.176          0.000
+     0.8        500          0.296          0.000
+     0.9        500          0.494          0.000
+    -> strategyproofness drops as the graph gets denser, then recovers at large p because with many self-attacks
+    -> almost nothing is accepted whatever is revealed, so there is nothing to gain by hiding.
+
+==============================================================================
+STEP 20  [Q2]  Instances where the Theorem 5.4 condition HOLDS but the mechanism is NOT strategyproof
+==============================================================================
+    condition holds in 142 of 4500 instances;  of those, not strategyproof: 0
+    -> none - exactly what the theorem promises (sufficient condition).  In the full 27,000-instance run: 0 as well,
+    -> under every reading of 'path' (simple path / walk, alpha=beta or not, and the book's wording).
+
+==============================================================================
+STEP 21  [Q3]  Instances that ARE strategyproof although the Theorem 5.4 condition FAILS
+==============================================================================
+    strategyproof instances: 1258;  of those the condition fails in 1116 (88.7% of the strategyproof ones; 1116 instances to note)
+    why they are strategyproof (violating pairs classified by comparing 'reveal all' vs 'hide alpha'):
+      rescue_offset        523 pairs   hiding alpha DOES free beta, but the agent loses alpha (or another argument) at the same time: a swap, no net gain
+      beta_hopeless       3949 pairs   beta can never be accepted whatever anyone reveals (it attacks itself, or an argument nobody can defeat attacks it), so nothing is to be gained
+      alpha_irrelevant     356 pairs   beta's status is the same with or without alpha (chain cut by others, or alpha is dead anyway)
+      hiding_hurts_beta     92 pairs   hiding alpha never frees beta and sometimes loses it: alpha's real effect on beta is supportive
+
+    One small instance of each class, worked through:
+
+    [rescue_offset]
+      attacks: [(2, 1)]
+      agents : agent 0 owns {3, 4}; agent 1 owns {0, 5, 6}; agent 2 owns {1, 2}
+      violating pair: agent 2 owns 2 and 1 (odd path 2 ~> 1)
+      everyone truthful      -> outcome {0, 2, 3, 4, 5, 6}, agent 2 utility 1
+      agent 2 hides 2        -> outcome {0, 1, 3, 4, 5, 6}, agent 2 utility 1
+    -> hiding alpha DOES free beta, but the agent loses alpha (or another argument) at the same time: a swap, no net gain
+
+    [beta_hopeless]
+      attacks: [(0, 1), (3, 1), (4, 1)]
+      agents : agent 0 owns {0, 2, 5}; agent 1 owns {}; agent 2 owns {1, 3, 4}
+      violating pair: agent 2 owns 3 and 1 (odd path 3 ~> 1)
+      everyone truthful      -> outcome {0, 2, 3, 4, 5}, agent 2 utility 2
+      agent 2 hides 3        -> outcome {0, 2, 4, 5}, agent 2 utility 1
+    -> beta can never be accepted whatever anyone reveals (it attacks itself, or an argument nobody can defeat attacks it), so nothing is to be gained
+
+    [alpha_irrelevant]
+      attacks: [(2, 1), (4, 2)]
+      agents : agent 0 owns {}; agent 1 owns {1, 2, 3, 4, 5}; agent 2 owns {0}
+      violating pair: agent 1 owns 2 and 1 (odd path 2 ~> 1)
+      everyone truthful      -> outcome {0, 1, 3, 4, 5}, agent 1 utility 4
+      agent 1 hides 2        -> outcome {0, 1, 3, 4, 5}, agent 1 utility 4
+    -> beta's status is the same with or without alpha (chain cut by others, or alpha is dead anyway)
+
+    [hiding_hurts_beta]
+      attacks: [(2, 4), (2, 5), (3, 2), (3, 4), (4, 0)]
+      agents : agent 0 owns {0, 1, 3, 4, 5}; agent 1 owns {2}; agent 2 owns {}
+      violating pair: agent 0 owns 3 and 0 (odd path 3 ~> 0)
+      everyone truthful      -> outcome {0, 1, 3, 5}, agent 0 utility 4
+      agent 0 hides 3        -> outcome {0, 1, 2}, agent 0 utility 2
+    -> hiding alpha never frees beta and sometimes loses it: alpha's real effect on beta is supportive
+
+##############################################################################
+#  SUMMARY
+##############################################################################
+  Part 1: all items 1-6E implemented and checked on the book's Figures 5.1-5.3.
+  Part 2: mechanism, best responses, Theorem 5.3 check, Theorem 5.4 check (cycle-safe), book Examples 5.10/5.11.
+  Experiments: Q1 table, Q2 = 0 counterexamples to Theorem 5.4, Q3 = many strategyproof instances where the
+  condition fails, all explained by swaps, hopeless targets, irrelevant or supportive arguments.
+  Full-scale numbers (27,000 instances) are in REPORT.md / report.pdf and results/.

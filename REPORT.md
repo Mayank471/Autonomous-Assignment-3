@@ -1,7 +1,7 @@
 # Assignment 3 – Report: Argumentation Engine and Strategic Argumentation
 
 All numbers below come from `python experiments.py` (seed 2024, output in `results/`) and from
-`python -m unittest test_engine`; nothing is estimated by hand except where stated.
+`python -m unittest test_engine test_book_examples`; nothing is estimated by hand except where stated.
 
 ## 1. Part 1 – The argumentation engine
 
@@ -142,7 +142,7 @@ reverses because a self-attack has probability p, so the fraction of self-attack
 revealing everything is a best response against every combination of the others' reports. This is exactly what Theorem 5.4
 claims (the condition is *sufficient*), so the experiment finds no counter-example to the theorem and also suggests that both
 checkers are implemented consistently. (`test_engine.py` repeats the check on 400 other random games.) So there is no list of
-instances to explain: `results/notable_instances.json` has an empty `cond_but_manipulable` list for every reading.
+instances to explain: `results/notable_instances.json` has an empty `cond_but_manipulable` list for every reading (the list the assignment asks me to "note" is therefore empty).
 
 *Why it should be so (intuition, not a full proof).* The grounded labelling is an alternating "in/out" propagation along
 attacks: an argument is out because an attacker is in, and in because all attackers are out. When agent *i* hides an argument α,
@@ -168,7 +168,8 @@ only odd connection is a non-simple walk going round a self-loop or cycle); all 
 So the condition is **not necessary**: with the headline reading, 6797 of the 26 072 instances that fail it (26.1 %) are
 strategyproof, and only 928 of the 7725 strategyproof instances (12.0 %) satisfy it. All 6797 instances are stored in
 `results/notable_instances.json` (`path_distinct → sp_but_cond_fails`, with attacks, each agent's argument set, the violating
-(agent, α, β) triples and the diagnosed reason); the other readings are under their own keys.
+(agent, α, β) triples and the diagnosed reason); the other readings are under their own keys. A flat, human-readable list of the headline instances is in
+`results/q3_strategyproof_but_condition_fails.csv`.
 
 To explain *why* each is strategyproof I compared, for every violating pair (α, β) and every combination of the others' reports,
 "reveal everything" with "hide α". Every pair falls in one of these classes:
@@ -197,7 +198,6 @@ Concrete instances (arguments are numbered; I re-ran each one to confirm the num
 4. **Revealing α actually helps (`hiding_hurts_beta`), instance 1227** – attacks {1→5, 1→6, 2→1, 5→6, 6→3}; agents {0, 4, 5}, {2, 6}, {1, 3}. Agent 1's
    pair (2, 6): the path 2→1→5→6 is odd (length 3), but 1 also attacks 6 directly (even route). Revealing 2 defeats 1, which lets 5 in and
    kills 6, so agent 1 holds only {2}. Hiding 2 leaves 1 accepted and it defeats both 5 and 6: agent 1 holds nothing. Agent 2's pair (1, 3) is similar.
-
 5. **The book's own instance of this phenomenon, Example 5.11** – x = {1,4,5,6} has indirect defeats 1 ⇝ 4 and 1 ⇝ 5 (paths 1→2→3→4, 1→2→3→5), so
    the condition fails, yet truth-telling is dominant. Diagnosis by the same procedure: class `alpha_irrelevant` for both pairs. The unattacked
    argument 6 (x's own) defeats 3 whenever it is revealed, so 3 is out regardless of 1 and 2, and 4 and 5 are accepted with or without 1. Hiding 1 only
@@ -224,7 +224,7 @@ self-loop (e.g. `4→0→6` plus `4→4`), which the simple-path reading does no
 ## 5. Reproducing
 
 ```bash
-python -m unittest -v test_engine
+python -m unittest -v test_engine test_book_examples
 python demo.py                      # output saved as demo_output.txt
 python experiments.py               # seed 2024, 3000 instances per p, writes results/
 ```

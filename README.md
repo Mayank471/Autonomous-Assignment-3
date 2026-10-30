@@ -12,15 +12,17 @@ Pure Python 3 (tested on 3.13), **no third-party packages**.
 | `book_examples.py` | The textbook's Figures 5.1-5.3 and Examples 5.10/5.11 as ready-made objects |
 | `test_engine.py` | 24 unit/property tests (hand-derived frameworks, random cross-checks) |
 | `test_book_examples.py` | 24 tests asserting every value the book states for its examples (and Theorem 5.3 as literally written) |
-| `demo.py`, `demo_output.txt` | Demonstration script and its captured output |
+| `demo.py`, `demo_output.txt` | Step-by-step demonstration (21 numbered steps) and its captured output |
 | `REPORT.md` | Report: design, experimental results, answers to the three questions |
-| `results/` | `summary.json`, `instances.csv` (one row per instance), `notable_instances.json`, `run_log.txt` |
+| `report.tex`, `report.pdf` | The report as LaTeX source and compiled PDF |
+| `results/` | `summary.json`, `instances.csv` (one row per instance), `notable_instances.json` (Q2/Q3 instance lists for every reading), `q3_strategyproof_but_condition_fails.csv` (Q3 list, headline reading), `run_log.txt` |
 
 ## How to run
 
 ```bash
 python -m unittest -v test_engine test_book_examples   # all 48 tests (< 1 s)
-python demo.py                           # guided demonstration (a few seconds)
+python demo.py                           # step-by-step demonstration (about 15 s)
+python demo.py --pause                   # same, waits for Enter between steps (live presentation)
 python experiments.py                    # 9 values of p (0.1 to 0.9) x 3000 instances = 27 000 (about 3-4 min)
 python experiments.py --instances 1000 --seed 7 --out results_small   # quicker / other seed
 ```
@@ -84,3 +86,19 @@ The two misprints from the assignment are handled in the code/tests/report:
 
 The book's Theorem 5.4 additionally requires each agent's type to be conflict-free; this is available as
 `satisfies_theorem_5_4(game, require_conflict_free=True)` and is reported as a fifth reading in the experiments.
+
+## Demonstration (`python demo.py`, output saved in `demo_output.txt`)
+
+Every step names the assignment item it demonstrates, prints the exact call that is executed (`>>>`) and its result.
+
+| Steps | Assignment item | What is shown (book examples) |
+|---|---|---|
+| 1 | Part 1, item 1 | Build Figure 5.1 with the framework class; attackers, targets, S+ |
+| 2-5 | items 2-5 | conflict-free, defended-by, characteristic function, admissible/complete (Examples 5.5, 5.6) |
+| 6-10 | items 6A-6E | grounded iteration, complete, preferred/stable/semi-stable, labellings of Fig. 5.2, acceptance status |
+| 11 | "test on the book" | runs all 48 tests (all pass) |
+| 12-14 | Part 2, items 1-2 | Example 5.10: mechanism outcome and utilities, all 8 reports of x, best response {4,5} |
+| 15 | item 3 | Theorem 5.3 check: Example 5.10 not strategyproof, Example 5.11 strategyproof |
+| 16 | item 4 | Theorem 5.4 condition with the odd paths shown; cycle handling (loop, 2-cycle, 3-cycle) |
+| 17 | misprints | utilities of y and z; argument 6 (not 5) cancels the indirect self-defeat |
+| 18-21 | Experiments Q1-Q3 | random instances (500 per p in the demo; 3000 per p in the report), strategyproof fraction, Q2 = 0, Q3 reasons with worked instances |
