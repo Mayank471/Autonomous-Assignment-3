@@ -1,5 +1,14 @@
 # Assignment 3 – Report: Argumentation Engine and Strategic Argumentation
 
+**Group Members**
+
+| Name | Roll Number |
+|---|---|
+| Om Chandra Sharma | B23CS1048 |
+| Mayank Dahiya | B23CS1035 |
+| Anmol Yadav | B23CS1004 |
+| Rudra Gupta | B23CS1098 |
+
 All numbers below come from `python experiments.py` (seed 2024, output in `results/`) and from
 `python -m unittest test_engine test_book_examples`; nothing is estimated by hand except where stated.
 
