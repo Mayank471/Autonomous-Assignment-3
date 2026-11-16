@@ -1,6 +1,7 @@
 # Assignment 3 – Argumentation Engine & Strategic Argumentation
 
-Pure Python 3 (tested on 3.13), **no third-party packages**.
+Pure Python 3 (tested on 3.13), **no third-party packages** for the engine, the mechanism, the tests and the experiments.
+`matplotlib` is needed only for the report figures and the interactive demo (`pip install matplotlib`).
 
 ## Files
 
@@ -9,6 +10,9 @@ Pure Python 3 (tested on 3.13), **no third-party packages**.
 | `argumentation.py` | Part 1: `ArgumentationFramework` class and all engine functions |
 | `strategic.py` | Part 2: grounded direct mechanism, best responses, strategyproofness check (Thm 5.3), odd-path condition (Thm 5.4) |
 | `experiments.py` | Random-instance experiment (writes to `results/`) |
+| `extra_stats.py` | Replays the exact experiment instances (same seed) to compute supplementary statistics for the report; writes `results/extra_stats.json` |
+| `make_figures.py`, `figures/` | Generates the report's figures (needs `matplotlib`); output is `figures/*.pdf` and `figures/*.png` |
+| `live_demo.py`, `viz.py` | Interactive visual demo for presentations (needs `matplotlib`); `viz.py` is the shared graph-drawing code |
 | `book_examples.py` | The textbook's Figures 5.1-5.3 and Examples 5.10/5.11 as ready-made objects |
 | `test_engine.py` | 24 unit/property tests (hand-derived frameworks, random cross-checks) |
 | `test_book_examples.py` | 24 tests asserting every value the book states for its examples (and Theorem 5.3 as literally written) |
@@ -25,6 +29,10 @@ python demo.py                           # step-by-step demonstration (about 15 
 python demo.py --pause                   # same, waits for Enter between steps (live presentation)
 python experiments.py                    # 9 values of p (0.1 to 0.9) x 3000 instances = 27 000 (about 3-4 min)
 python experiments.py --instances 1000 --seed 7 --out results_small   # quicker / other seed
+python live_demo.py                      # interactive visual demo (see "Live visual demo" below)
+python extra_stats.py                    # supplementary statistics (about 10 s, needs results/ from experiments.py)
+python make_figures.py                   # regenerate figures/ for the report (needs matplotlib)
+pdflatex report.tex                      # build report.pdf (run twice)
 ```
 
 ## Assignment items → code
@@ -86,6 +94,29 @@ The two misprints from the assignment are handled in the code/tests/report:
 
 The book's Theorem 5.4 additionally requires each agent's type to be conflict-free; this is available as
 `satisfies_theorem_5_4(game, require_conflict_free=True)` and is reported as a fifth reading in the experiments.
+
+## Live visual demo (`python live_demo.py`)
+
+An interactive window for presentations; every number is recomputed by the real engine.
+
+```bash
+python live_demo.py                  # opens on Example 5.10
+python live_demo.py --preset fig53   # start on another example
+python live_demo.py --export frames  # no window: save a PNG sequence to frames/ (backup for slides)
+```
+
+| Control | Effect |
+|---|---|
+| click an argument | reveal / hide it (hidden = dashed circle); outcome, utilities and best responses update immediately |
+| `n` / Step, `p` / Play | walk through the grounded extension F⁰(∅) ⊆ F¹(∅) ⊆ … on the graph (green = in, red = out, white = not decided yet) |
+| `b` / Best deviation | the first agent that can gain by deviating switches to its best response (Example 5.10: x hides 1) |
+| `a` / Reveal all, `r` / Reset steps | back to the truthful profile / leave step mode |
+| `1`–`6` | Example 5.10, Example 5.11, Figures 5.1, 5.2, 5.3, the small "hide α" example |
+
+Suggested run: Example 5.10 (x can get 2: click 1, or press `b`) → Figure 5.1 (press `n` twice; hide 3) → Example 5.11 (hide 1: x
+only loses, although the Theorem 5.4 condition fails) → Figure 5.3. The side panel shows each agent's utility, whether truthful
+revelation is still a best response, and the Theorem 5.3 / 5.4 verdicts for the whole game. If the machine has no display, use
+`--export frames` and show the PNGs.
 
 ## Demonstration (`python demo.py`, output saved in `demo_output.txt`)
 
